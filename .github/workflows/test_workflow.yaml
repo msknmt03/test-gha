@@ -10,8 +10,10 @@ jobs:
   check-pull-request:
     # Check labels and author
     if: >-
-      contains(github.event.pull_request.labels.*.name, 'auto/merge') &&
-      github.event.pull_request.user.login == ${{ vars.AUTHORIZED_USER }}
+      ${{
+        contains(github.event.pull_request.labels.*.name, 'auto/merge') &&
+        github.event.pull_request.user.login == vars.AUTHORIZED_USER
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
