@@ -18,18 +18,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
 
-      - name: First Check
-        run: |
-          echo ${{ github.event.pull_request.labels }}
-          echo ${{ github.event.pull_request }}
-          echo ${{ github.event.pull_request.user.login }}
-
       - name: Check
         id: check_pr
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const ghepr = ${{ github.event.pull_request }}
+            console.log('%o', ghepr)
+
             const owner = context.repo.owner
             const repo = context.repo.repo
             console.log('owner: ' + owner)
@@ -45,7 +42,7 @@ jobs:
             console.log('commits: ' + pull.data.commits)
             console.log('sha: ' + pull.data.head.sha)
 
-            console.log('pull: ' + pull)
+            console.log('%o', pull)
 
             // Get commit status
             const statusResponse = await github.rest.repos.getCombinedStatusForRef({
@@ -55,7 +52,7 @@ jobs:
             })
 
             console.log('state: ' + statusResponse.data.state)
-            console.log('response: ' + statusResponse)
+            console.log('%o', statusResponse)
 
             // Check
             if (pull.data.commits != 1) {
