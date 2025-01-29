@@ -1,0 +1,62 @@
+name: 'test-workflow'
+on:
+  pull_request:
+    branches: 
+      - main
+    types: 
+      - labeled
+
+jobs:
+  check-pull-request:
+    # Check labels and author
+    if: >-
+      contains(github.event.pull_request.labels.*.name, 'auto/merge') &&
+      github.event.pull_request.user.login == ${{ vars.AUTHORIZED_USER }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Check
+        id: check_pr
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          scripts: |
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            console.log(owner)
+            console.log(repo)
+
+            // Get PR details
+            const pull = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: context.payload.pull_request.number
+            })
+            console.log(context.payload.pull_request.number)
+            console.log(pull.data.commits)
+            console.log(pull.data.head.sha)
+
+            console.log(pull)
+
+            // Get commit status
+            const statusResponse = await github.rest.repos.getCombinedStatusForRef({
+              owner,
+              repo,
+              ref: pull.data.head.sha
+            })
+
+            console.log(statusResponse.data.state)
+
+            // Check
+            if (pull.data.commits != 1) {
+              core.setFailed('This PR does not just one commit.')
+            } else if (statusResponse.data.state != 'success'){
+              core.setFailed('This PR has not passed CI.')
+            }
+
+      - name: Next step
+        if: success()
+        run: echo 'Success! Hello World!'
