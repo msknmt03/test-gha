@@ -18,12 +18,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
 
+      - name: First Check
+        run: |
+          echo ${{ github.event.pull_request.labels.*.name }}
+          echo ${{ github.event.pull_request.user.login }}
+
       - name: Check
         id: check_pr
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          scripts: |
+          script: |
             const owner = context.repo.owner
             const repo = context.repo.repo
             console.log(owner)
