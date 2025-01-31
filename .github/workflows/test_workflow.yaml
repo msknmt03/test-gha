@@ -26,13 +26,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const ghepr = ${{ github.event.pull_request }}
-            console.log('%o', ghepr)
-
             const owner = context.repo.owner
             const repo = context.repo.repo
-            console.log('owner: ' + owner)
-            console.log('repo: ' + repo)
 
             // Get PR details
             const pull = await github.rest.pulls.get({
@@ -44,9 +39,14 @@ jobs:
             console.log('commits: ' + pull.data.commits)
             console.log('sha: ' + pull.data.head.sha)
 
-            console.log('%o', pull)
-
             // Get commit status
+            const commitResponseList = await github.rest.repos.listCommitStatusesForRef({
+              owner,
+              repo,
+              ref: pull.data.head.sha
+            })
+            console.log('%o', commitResponseList)
+
             const statusResponse = await github.rest.repos.getCombinedStatusForRef({
               owner,
               repo,
