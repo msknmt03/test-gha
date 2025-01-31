@@ -26,8 +26,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const owner = context.repo.owner
-            const repo = context.repo.repo
+            const { owner, repo } = context.repo
 
             // Get PR details
             const pull = await github.rest.pulls.get({
@@ -54,7 +53,7 @@ jobs:
             })
 
             console.log('state: ' + statusResponse.data.state)
-            console.log('%o', statusResponse.statuses)
+            console.log('%o', statusResponse.data.statuses)
             
             let run           = 0
             let isTimeout     = false
