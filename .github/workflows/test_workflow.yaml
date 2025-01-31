@@ -64,10 +64,10 @@ jobs:
                 break
               }
 
-              const { data: { statuses } } = await github.repos.getCombinedStatusForRef({
+              const { data: { statuses } } = await github.rest.repos.getCombinedStatusForRef({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: pull/context.payload.pull_request.number/merge,
+                ref: pull.data.head.sha,
               });
 
               const failedCheck = statuses.find(({ state }) => state !== 'success');
