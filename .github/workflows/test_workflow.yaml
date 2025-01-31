@@ -67,7 +67,7 @@ jobs:
               const { data: { statuses } } = await github.repos.getCombinedStatusForRef({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: `pull/context.payload.pull_request.number/merge`,
+                ref: pull/context.payload.pull_request.number/merge,
               });
 
               const failedCheck = statuses.find(({ state }) => state !== 'success');
