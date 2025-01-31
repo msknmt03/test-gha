@@ -55,6 +55,35 @@ jobs:
 
             console.log('state: ' + statusResponse.data.state)
             console.log('%o', statusResponse.statuses)
+            
+            let run           = 0
+            let isTimeout     = false
+            while (true) {
+              if (run >= 10){
+                isTimeout = true
+                break
+              }
+
+              const { data: { statuses } } = await github.repos.getCombinedStatusForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `pull/context.payload.pull_request.number/merge`,
+              });
+
+              const failedCheck = statuses.find(({ state }) => state !== 'success');
+              if (!failedCheck) {
+                break;
+              }
+
+              if (failedCheck.state === 'failure') {
+                core.setFailed('A check failed');
+                break;
+              }
+
+              // Sleep for 30 seconds
+              await new Promise(resolve => setTimeout(resolve, 30000));
+              run++
+            }
 
             // Check
             if (pull.data.commits != 1) {
