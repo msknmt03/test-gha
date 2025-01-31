@@ -45,7 +45,7 @@ jobs:
               ref: pull.data.head.sha
             })
             console.log('%o', commitResponseList.data)
-            console.log(commitResponseList.data
+            console.log(commitResponseList.data)
             console.log(commitResponseList)
 
             const statusResponse = await github.rest.repos.getCombinedStatusForRef({
