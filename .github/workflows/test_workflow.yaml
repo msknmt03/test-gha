@@ -45,7 +45,7 @@ jobs:
               repo,
               ref: pull.data.head.sha
             })
-            console.log('%o', commitResponseList)
+            console.log('%o', commitResponseList.data)
 
             const statusResponse = await github.rest.repos.getCombinedStatusForRef({
               owner,
@@ -54,7 +54,7 @@ jobs:
             })
 
             console.log('state: ' + statusResponse.data.state)
-            console.log('%o', statusResponse)
+            console.log('%o', statusResponse.statuses)
 
             // Check
             if (pull.data.commits != 1) {
