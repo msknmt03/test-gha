@@ -31,6 +31,15 @@ jobs:
             const { owner, repo } = context.repo
             console.log('owner: ' + owner)
             console.log('repo: ' + repo)
+            
+            // Get PR details
+            const pull = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: context.payload.workflow_run.pull_requests[0].number
+            })
+            console.log('pull: ' + pull)
+            core.info(JSON.stringify(pull))
 
             core.info(JSON.stringify(context.payload))
 
