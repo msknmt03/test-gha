@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
 
-      - name: Check label and commit count and author
+      - name: Check label and commit count
         id: check_pr
         uses: actions/github-script@v7
         with:
@@ -32,9 +32,9 @@ jobs:
 
             // Check
             if (!pull.data.labels.map(label => label.name).includes('auto/merge')) {
-              core.setFailed('This PR does not have the auto/merge label.')
+              core.setFailed('This PR does not have the auto/merge label: ' + pull.data.html_url)
             } else if (pull.data.commits != 1) {
-              core.setFailed('This PR does not just one commit.')
+              core.setFailed('This PR does not just one commit: ' + pull.data.html_url)
             }
 
       - name: Next step
