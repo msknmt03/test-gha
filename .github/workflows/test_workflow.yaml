@@ -28,6 +28,7 @@ jobs:
             console.log('repo: ' + repo)
 
             console.log('github.event.workflow_run: ' + ${{ github.event.workflow_run}})
+            core.info(JSON.stringify(${{ github.event.workflow_run}}))
 
             core.info(JSON.stringify(context.payload))
 
