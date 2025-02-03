@@ -6,10 +6,10 @@ on:
 
 jobs:
   check-pull-request:
-    # Check labels and author
     if: >-
       ${{
-        github.event.workflow_run.conclusion == 'success'
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.actor.login == vars.AUTHORIZED_USER
       }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -17,31 +17,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
 
-      - name: Show
-        run: |
-          echo "conclusion: ${{ github.event.workflow_run.conclusion }}"
-          echo "github.event: ${{ toJSON(github.event) }}"
-
-      - name: Check
+      - name: Check label and commit count and author
         id: check_pr
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { owner, repo } = context.repo
-            console.log('owner: ' + owner)
-            console.log('repo: ' + repo)
-            
             // Get PR details
             const pull = await github.rest.pulls.get({
-              owner,
-              repo,
+              owner: context.repo.owner
+              repo: context.repo.repo
               pull_number: context.payload.workflow_run.pull_requests[0].number
             })
-            console.log('pull: ' + pull)
-            core.info(JSON.stringify(pull))
 
-            core.info(JSON.stringify(context.payload))
+            // Check
+            if (!pull.data.labels.map(label => label.name).includes('auto/merge')) {
+              core.setFailed('This PR does not have the auto/merge label.')
+            } else if (pull.data.commits != 1) {
+              core.setFailed('This PR does not just one commit.')
+            }
 
       - name: Next step
         if: success()
