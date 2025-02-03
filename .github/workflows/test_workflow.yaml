@@ -1,11 +1,8 @@
 name: 'test-workflow'
 on:
   workflow_run:
-    branches:
-      - main
     workflows: [test-pr-workflow]
-    types:
-      - completed
+    types: [completed]
 
 jobs:
   check-pull-request:
