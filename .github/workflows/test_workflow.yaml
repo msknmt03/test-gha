@@ -1,18 +1,19 @@
 name: 'test-workflow'
 on:
-  pull_request:
-    branches: 
+  workflow_run:
+    branches:
       - main
-    types: 
-      - labeled
+    workflows:
+      - 'test-pr-workflow'
+    types:
+      - completed
 
 jobs:
   check-pull-request:
     # Check labels and author
     if: >-
       ${{
-        contains(github.event.pull_request.labels.*.name, 'auto/merge') &&
-        github.event.pull_request.user.login == vars.AUTHORIZED_USER
+        github.event.workflow_run.conclusion == 'success'
       }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -27,76 +28,12 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { owner, repo } = context.repo
+            console.log('owner: ' + owner)
+            console.log('repo: ' + repo)
 
-            // Get PR details
-            const pull = await github.rest.pulls.get({
-              owner,
-              repo,
-              pull_number: context.payload.pull_request.number
-            })
-            console.log('PRnumber: ' + context.payload.pull_request.number)
-            console.log('commits: ' + pull.data.commits)
-            console.log('sha: ' + pull.data.head.sha)
+            console.log('github.event.workflow_run: ' + ${{ github.event.workflow_run}})
 
-            // Get commit status
-            const commitResponseList = await github.rest.repos.listCommitStatusesForRef({
-              owner,
-              repo,
-              ref: pull.data.head.sha
-            })
-            console.log('%o', commitResponseList.data)
-            console.log(commitResponseList.data)
-            console.log(commitResponseList)
-
-            const statusResponse = await github.rest.repos.getCombinedStatusForRef({
-              owner,
-              repo,
-              ref: pull.data.head.sha
-            })
-
-            console.log('state: ' + statusResponse.data.state)
-            console.log('%o', statusResponse.data.statuses)
-            console.log(statusResponse.data.statuses)
-            console.log('%o', statusResponse.data)
-            
-            let run           = 0
-            let isTimeout     = false
-            while (true) {
-              if (run >= 10){
-                isTimeout = true
-                break
-              }
-
-              console.log('run count: ' + run)
-
-              const { data: { statuses } } = await github.rest.repos.getCombinedStatusForRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: pull.data.head.sha,
-              });
-
-              const failedCheck = statuses.find(({ state }) => state !== 'success');
-              if (!failedCheck) {
-                console.log('success?: ' + statuses.state)
-                break;
-              }
-
-              if (failedCheck.state === 'failure') {
-                core.setFailed('A check failed');
-                break;
-              }
-
-              // Sleep for 30 seconds
-              await new Promise(resolve => setTimeout(resolve, 30000));
-              run++
-            }
-
-            // Check
-            if (pull.data.commits != 1) {
-              core.setFailed('This PR does not just one commit.')
-            } else if (statusResponse.data.state != 'success'){
-              core.setFailed('This PR has not passed CI.')
-            }
+            core.info(JSON.stringify(context.payload))
 
       - name: Next step
         if: success()
