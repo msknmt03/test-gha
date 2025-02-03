@@ -20,7 +20,7 @@ jobs:
       - name: Show
         run: |
           echo "conclusion: ${{ github.event.workflow_run.conclusion }}"
-          echo "workflow_run: ${{ github.event.workflow_run }}"
+          echo "github.event: ${{ toJSON(github.event) }}"
 
       - name: Check
         id: check_pr
